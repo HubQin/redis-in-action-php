@@ -94,7 +94,7 @@ function getArticles($redis, $page, $order = 'score:')
     $articles = [];
     foreach ($ids as $id) {
         $article_data = $redis->hGetAll($id);
-        $article_data[1] = $id;
+        $article_data['id'] = $id;
         $articles[] = $article_data;
     }
     return $articles;
