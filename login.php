@@ -1,10 +1,6 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: hugh
- * Date: 2019/6/8
- * Time: 8:44
- */
+ * 登录/token
 
 /**
  * Data structure
@@ -95,6 +91,7 @@ function cleanSessions($redis)
         //取出recent: 集合保留0-100之间的记录，也即超过LIMIT的这一部分
         //下面将这一部分进行删除
         $tokens = $redis->zRange('recent:', 0, $end_index - 1);
+        var_dump($redis->zRange('recent:', 0, 0, true)['token-0']);
         $session_keys = [];
         foreach ($tokens as $token) {
             $session_keys[] = 'viewed:' . $token;
