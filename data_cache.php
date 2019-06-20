@@ -1,7 +1,6 @@
 <?php
 /**
  * 数据缓存
- * 疑问：设置一个过期时间不就好了？
  */
 const QUIT = false;
 $redis = new Redis();
