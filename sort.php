@@ -1,5 +1,6 @@
 <?php
 //Sort命令详解
+//https://redis.io/commands/sort
 $redis = new Redis();
 $redis->connect('127.0.0.1', '6379') || exit('连接失败！');
 
@@ -8,12 +9,12 @@ $redis->connect('127.0.0.1', '6379') || exit('连接失败！');
  *
  * @param   string  $key
  * @param   array   $option array(key => value, ...) - optional, with the following keys and values:
- * - 'by' => 'some_pattern_*',
- * - 'limit' => array(0, 1),
- * - 'get' => 'some_other_pattern_*' or an array of patterns,
+ * - 'by' => 'some_pattern_*', //使用被排序的key之外的匹配相应模式的key来排序
+ * - 'limit' => array(0, 1),  //取出第一个位置开始的一个元素
+ * - 'get' => 'some_other_pattern_*' or an array of patterns, //获取其他匹配的key
  * - 'sort' => 'asc' or 'desc',
  * - 'alpha' => TRUE,
- * - 'store' => 'external-key'
+ * - 'store' => 'external-key'  //保存排序结果到external-key
  * @return  array
  * An array of values, or a number corresponding to the number of elements stored if that was used.
  * @link    https://redis.io/commands/sort

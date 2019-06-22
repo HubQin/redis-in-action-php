@@ -37,9 +37,18 @@ function articleVote($redis, $user, $article)
     $article_id = explode(':', $article)[1];
     //无序集合，添加记录，如果记录存在，返回0（说明用户已对该文章投票），反之则计算分数
     if ($redis->sAdd('voted:' . $article_id, $user)) {
-        //暂不考虑事务操作
-        $redis->zIncrBy('score:' , VOTE_SCORE, $article); //增加文章的分数
-        $redis->hIncrBy($article, 'votes', 1);  //增加文章的投票数
+        // 使用事务操作
+        /*$redis->multi()
+            ->zIncrBy('score:' , VOTE_SCORE, $article) //增加文章的分数
+            ->hIncrBy($article, 'votes', 1)  //增加文章的投票数
+            ->exec();*/
+
+        //使用pipeline型的事务
+        //一次性向服务端发送所有命令，减少客户端与服务端之间通讯往返次数
+        $pipe = $redis->multi(Redis::PIPELINE);
+        $pipe->zIncrBy('score:', VOTE_SCORE, $article);
+        $pipe->hIncrBy($article, 'votes', 1);
+        $pipe->exec();
     }
 }
 
@@ -91,11 +100,20 @@ function getArticles($redis, $page, $order = 'score:')
     //获取指定范围内的member值（文章ID，article:123456），按$order分数递减排序
     $ids = $redis->zRevRange($order, $start, $end);
 
-    $articles = [];
+    $pipe = $redis->multi(Redis::PIPELINE);
     foreach ($ids as $id) {
-        $article_data = $redis->hGetAll($id);
+        $pipe->hGetAll($id);
+
+        //不使用pipeline的时候
+        /*$article_data = $redis->hGetAll($id);
         $article_data['id'] = $id;
-        $articles[] = $article_data;
+        $articles[] = $article_data;*/
+    }
+    $articles = $pipe->exec();
+
+    //把文章ID加回去
+    foreach ($articles as $k => $article) {
+        $articles[$k]['id'] = $ids[$k];
     }
     return $articles;
 }
@@ -157,6 +175,7 @@ print_r($scores);
 echo "文章列表:" . PHP_EOL;
 $articles = getArticles($redis, 1);
 print_r($articles);
+exit();
 
 //给文章添加分类
 addRemoveGroups($redis, '1', ['php', 'redis']);
