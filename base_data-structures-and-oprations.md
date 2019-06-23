@@ -179,3 +179,6 @@ ZREMRANGEBYRANK key-name start stop
 //移除有序集 key 中，所有 score 值介于 min 和 max 之间(包括等于 min 或 max )的成员
 ZREMRANGEBYSCORE key-name min max
 ```
+
+## 设置过期时间
+
