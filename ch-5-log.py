@@ -68,7 +68,7 @@ def log_common(conn, name, message, severity=logging.INFO, timeout=5):
                 pipe.rename(destination, destination + ':last') 
                 # KEY [common:日志名称：日志级别:start] 重命名为 [common:日志名称：日志级别:pstart]
                 pipe.rename(start_key, destination + ':pstart') 
-                # KEY [common:日志名称：日志级别:start] 的值更新为当前小时数
+                # 之前的KEY已经归档，这里是新的
                 pipe.set(start_key, hour_start) 
 
             # 不存在则添加该日志开始时间记录                
@@ -91,6 +91,8 @@ log_common(conn, 'test', 'msg')
 #结果
 #（zset）common:test:info   msg --> 1
 # -->1小时后再次记录日志的话，该KEY就会变成common:test:info:last
+
 #（string）common:test:info:start   14（小时数）
 # -->1小时后再次记录日志的话，该KEY就会变成common:test:info:pstart
+
 #（list）recent:test:info   Wed Jun 26 22:53:17 2019 msg
